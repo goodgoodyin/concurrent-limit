@@ -1,0 +1,5 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.concurrent.limit.base.ConcurrentLimitAutoConfiguration,\
+  com.concurrent.limit.base.ConcurrentLimitAspectAutoConfiguration
+

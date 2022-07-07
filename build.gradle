@@ -1,0 +1,126 @@
+plugins {
+    //生成jar包的插件
+    id 'java-library'
+
+    //把jar包发布到maven私服的插件
+    id 'maven-publish'
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+// 编码
+[compileJava,compileTestJava,javadoc]*.options*.encoding = 'UTF-8'
+
+project.ext {
+    lang3 = 'org.apache.commons:commons-lang3:3.8.1'
+
+    //test
+    junit4 = "junit:junit:4.12"
+
+    //mongo
+    jongo = "org.jongo:jongo:1.4.0"
+    mongoDriver = "org.mongodb:mongo-java-driver:3.2.2"
+
+    slf4j = 'org.slf4j:slf4j-api:1.7.25'
+
+    jackson = 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.7'
+
+    //http
+    httpclient4 = 'org.apache.httpcomponents:httpclient:4.5.8'
+    httpCore = 'org.apache.httpcomponents:httpcore:4.4.11'
+    servlet = 'javax.servlet:javax.servlet-api:3.1.0'
+
+    //redis
+    jedis = 'redis.clients:jedis:2.8.2'
+
+    // feign 相关依赖
+    feignCore = 'io.github.openfeign:feign-core:10.2.4'
+    feignJackson = 'io.github.openfeign:feign-jackson:10.2.0'
+    feignHttp = 'io.github.openfeign:feign-httpclient:10.2.0'
+
+    springAOP = 'org.springframework.boot:spring-boot-starter-aop:2.3.0.RELEASE'
+}
+
+dependencies {
+    //compileOnly 只在编译期间生效，确保编译不会报错，依赖这个工程的包打包的时候，并不会把这些依赖打进去
+    //且 即使有些依赖没写，只要没有使用到某个类，ClassLoader 便不会加载这个类，就不会抛 ClassNotFound 异常
+    //所以大家只要遵循这个特点，便可以放心大胆的随便依赖
+
+    compileOnly "$junit4"
+
+    compileOnly "$mongoDriver"
+
+    compileOnly "${lang3}"
+    compileOnly "${slf4j}"
+
+    compileOnly "${jackson}"
+    compileOnly "${httpclient4}"
+    compileOnly "${httpCore}"
+    compileOnly "${servlet}"
+
+    compileOnly "${jedis}"
+
+    compileOnly "${feignCore}"
+    compileOnly "${feignJackson}"
+    compileOnly "${feignHttp}"
+    compileOnly "${springAOP}"
+    compileOnly "${commonRedis}"
+
+}
+
+//生成sourcesJar
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+//将打包出来的jar上传到maven私服上
+//版本号和C端保持一致
+publishing {
+    publications {
+
+        def current_version = "1.0"
+
+        //dev环境
+        //版本号： 1.1-SNAPSHOT
+        //该版本号不用变动
+        mavenJavaDev(MavenPublication) {
+            groupId = "com"
+            artifactId =  "concurrent-limit"
+            version = "${current_version}-SNAPSHOT"
+
+            //components.java 是jar包的意思
+            from components.java
+            artifact sourcesJar
+        }
+    }
+
+    repositories {
+        
+        //上传到 release仓库
+        maven {
+            name = "devNexus"
+            url =  "http://xxx/repository/geek-snapshot/"
+
+            credentials {
+                username 'xxx'
+                password 'xxx'
+            }
+        }
+    }
+}
+
+repositories {
+    maven {
+        url "http://xxx/repository/maven-public/"
+    }
+    //jcenter()
+}
+

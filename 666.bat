@@ -1,0 +1,7 @@
+:: 把当前工程生成的快照版本 jar 上传到 maven私服的
+:: publishMavenJavaProdPublicationToProdNexusRepository
+:: publishMavenJavaDevPublicationToDevNexusRepository
+
+call gradlew.bat publishMavenJavaDevPublicationToDevNexusRepository
+pause
+exit
